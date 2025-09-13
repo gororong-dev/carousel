@@ -1,19 +1,16 @@
-# Custom License / 사용자 지정 라이선스
+Custom License / 사용자 지정 라이선스
 
 Copyright (c) 2025 고롱고롱고로롱 / GorongGorongGororong
 
-**📋 관련 문서**: 버전 관리 정책은 [VERSION_POLICY.md](./VERSION_POLICY.md) 참조  
-**📦 현재 버전**: [VERSION](./VERSION) 파일 확인
-
----
-
-## [Korean]
+================================================================================
+KOREAN VERSION
+================================================================================
 
 본 소프트웨어(이하 "프로그램")의 사용, 복제, 수정, 배포, 판매 등 모든 권한은 저작자가 서면 또는 명시적으로 승인한 사용자에게만 부여됩니다.
 
 저작자의 사전 서면 또는 명시적 승인을 받은 경우에 한하여 프로그램을 사용할 수 있습니다. 저작자의 승인을 받지 않은 자는 프로그램에 대한 어떠한 권리도 갖지 않습니다.
 
-프로그램의 사용 허가는 버전별로 개별 적용되며, 각 버전 또는 업데이트마다 저작자의 별도 승인이 필요할 수 있습니다. 이전 버전에 대한 사용 허가가 새로운 버전에 대한 자동적 사용 권한을 부여하지 않습니다. 자세한 버전 관리 정책은 [VERSION_POLICY.md](./VERSION_POLICY.md)를 참조하십시오.
+프로그램의 사용 허가는 버전별로 개별 적용되며, 각 버전 또는 업데이트마다 저작자의 별도 승인이 필요할 수 있습니다. 이전 버전에 대한 사용 허가가 새로운 버전에 대한 자동적 사용 권한을 부여하지 않습니다. 자세한 버전 관리 정책은 (https://github.com/gororong-dev/carousel/blob/main/VERSION_POLICY.md)를 참조하십시오.
 
 저작자는 프로그램의 사용, 복제, 수정, 배포, 판매 등과 관련하여 발생하는 모든 직접적, 간접적, 부수적, 특별 또는 결과적 손해에 대해 어떠한 책임도 지지 않습니다. 프로그램은 "있는 그대로(as is)" 제공되며, 명시적 또는 묵시적 보증을 포함한 어떠한 형태의 보증도 제공하지 않습니다.
 
@@ -21,15 +18,15 @@ Copyright (c) 2025 고롱고롱고로롱 / GorongGorongGororong
 
 본 라이선스의 해석 및 적용은 대한민국 법률을 따릅니다.
 
----
-
-## [English]
+================================================================================
+ENGLISH VERSION
+================================================================================
 
 All rights to use, copy, modify, distribute, and sell this software (hereinafter referred to as "the Program") are granted solely to users who have received prior written or explicit approval from the author.
 
 You may use the Program only if you have obtained written or explicit permission from the author. Any person who has not received such approval shall have no rights to the Program.
 
-Usage permissions for the Program are granted on a version-by-version basis, and separate approval from the author may be required for each version or update. Prior permission to use a previous version does not automatically grant rights to use newer versions. For detailed version management policy, please refer to [VERSION_POLICY.md](./VERSION_POLICY.md).
+Usage permissions for the Program are granted on a version-by-version basis, and separate approval from the author may be required for each version or update. Prior permission to use a previous version does not automatically grant rights to use newer versions. For detailed version management policy, please refer to (https://github.com/gororong-dev/carousel/blob/main/VERSION_POLICY.md).
 
 The author shall not be liable for any direct, indirect, incidental, special, or consequential damages arising out of or in connection with the use, copying, modification, distribution, or sale of the Program. The Program is provided "as is," without any express or implied warranties of any kind, including but not limited to warranties of merchantability, fitness for a particular purpose, or non-infringement.
 
