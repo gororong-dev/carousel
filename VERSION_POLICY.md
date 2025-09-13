@@ -40,9 +40,7 @@
 ## 버전 확인 방법 / Version Check
 
 - **VERSION 파일**: [VERSION](./VERSION) 파일에서 현재 버전 확인
-- **Git 태그**: `git tag` 명령어로 릴리스된 버전 확인
 - **라이선스 조건**: [LICENSE](./LICENSE) 파일에서 상세 조건 확인
-- **GitHub 릴리스**: [Releases 페이지](https://github.com/gororong-dev/carousel/releases)에서 모든 버전 확인
 
 ---
 
