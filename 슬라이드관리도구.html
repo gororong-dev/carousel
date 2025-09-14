@@ -26,7 +26,7 @@
                             <button class="action-btn info" id="helpBtn" onclick="toggleHelp()" title="사용법 및 키보드 컨트롤 보기">
                                 <span style="font-size: 16px;">ℹ️</span> 정보
                             </button>
-                            <button class="action-btn secondary" id="selectDirectoryBtn">권한 승인</button>
+                            <button class="action-btn secondary" id="selectDirectoryBtn">폴더 선택</button>
                             <button class="action-btn primary" id="refreshImagesBtn" onclick="refreshImages()" style="display: none;">새로고침</button>
                             <button class="action-btn warning" onclick="resetConfig()">초기화</button>
                         </div>
@@ -39,7 +39,7 @@
                                 <strong style="color: #007bff; font-size: 16px;">관리 도구 사용법</strong>
                                 <br><br>
                                 <strong>기본 설정:</strong>
-                                <br>1. '권한 승인' 버튼 클릭하여 프로젝트 루트폴더의 <strong>images</strong> 폴더 선택
+                                <br>1. '폴더 선택' 버튼 클릭하여 프로젝트 루트폴더의 <strong>images</strong> 폴더 선택
                                 <br>2. '새로고침' 버튼으로 images 폴더의 최신 상태 반영
                                 <br>3. 이미지 추가는 직접 images 폴더에 파일을 복사한 후 새로고침
                             </div>
@@ -593,13 +593,13 @@
             }
 
             async removeImage(imageId) {
-                if (confirm('이 이미지를 삭제하시겠습니까?')) {
+                if (confirm('이 이미지를 삭제하시겠습니까?\n\n(실제 파일은 "images/deleted" 폴더로 이동됩니다)')) {
                     this.showLoading();
                     try {
                         const removed = await this.configManager.removeImage(imageId);
                         if (removed) {
                             await this.loadImageList();
-                            this.showNotification('이미지가 삭제되었습니다.\n💾 실제 파일도 함께 삭제되었습니다.', 'success');
+                            this.showNotification('이미지가 삭제되었습니다.\n💾 파일은 "deleted" 폴더로 이동되었습니다.', 'success');
                         }
                     } catch (error) {
                         console.error('이미지 삭제 실패:', error);
@@ -757,7 +757,7 @@
                 const helpMessage = document.getElementById('helpMessage');
 
                 if (this.configManager.hasDirectoryAccess()) {
-                    // 권한 승인 버튼 숨김, 새로고침 버튼 표시
+                    // 폴더 선택 버튼 숨김, 새로고침 버튼 표시
                     selectBtn.style.display = 'none';
                     refreshBtn.style.display = 'inline-block';
                     
@@ -769,10 +769,10 @@
                     openSlideBtn.disabled = false;
                     openSlideBtn.title = '슬라이드 화면을 새 창으로 엽니다';
                 } else {
-                    // 새로고침 버튼 숨김, 권한 승인 버튼 표시
+                    // 새로고침 버튼 숨김, 폴더 선택 버튼 표시
                     selectBtn.style.display = 'inline-block';
                     refreshBtn.style.display = 'none';
-                    selectBtn.textContent = '권한 승인';
+                    selectBtn.textContent = '폴더 선택';
                     selectBtn.className = 'action-btn secondary';
                     selectBtn.disabled = false;
                     selectBtn.title = '프로젝트 images 폴더를 선택해주세요';
