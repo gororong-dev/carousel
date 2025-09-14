@@ -557,11 +557,17 @@ class CarouselSlider {
     } else {
       // 페이드 모드에서는 첫 번째 슬라이드만 활성화
       slides.forEach((slide, index) => {
+        // 모든 슬라이드에 transition 설정
+        slide.style.transition = `opacity ${settings.transitionDuration}ms ease-in-out, transform ${settings.transitionDuration}ms ease-in-out`;
+        slide.style.display = "block"; // 페이드 모드에서는 모든 슬라이드가 화면에 있어야 함
+
         if (index === 0) {
           slide.classList.add("active");
+          slide.style.opacity = "1";
           // console.log(`✨ 첫 번째 슬라이드 활성화`);
         } else {
           slide.classList.remove("active");
+          slide.style.opacity = "0";
         }
         // 페이드 모드에서는 기본 스타일로 복원
         slide.style.width = "";
@@ -646,16 +652,38 @@ class CarouselSlider {
   updateSlideFade(newIndex) {
     const slides = this.slidesContainer.querySelectorAll(".carousel-slide");
     const indicators = this.indicators.querySelectorAll(".carousel-indicator");
+    const settings = this.configManager.getSettings();
+
+    // 모든 슬라이드에 transition 속성 강제 적용
+    slides.forEach((slide) => {
+      slide.style.transition = `opacity ${settings.transitionDuration}ms ease-in-out, transform ${settings.transitionDuration}ms ease-in-out`;
+      slide.style.display = "block"; // 페이드 모드에서는 모든 슬라이드가 보이도록
+    });
 
     // 이전 슬라이드 비활성화
-    slides[this.currentIndex]?.classList.remove("active");
+    if (slides[this.currentIndex]) {
+      slides[this.currentIndex].classList.remove("active");
+      // 명시적으로 opacity를 0으로 설정
+      setTimeout(() => {
+        if (
+          slides[this.currentIndex] &&
+          !slides[this.currentIndex].classList.contains("active")
+        ) {
+          slides[this.currentIndex].style.opacity = "0";
+        }
+      }, 10);
+    }
     indicators[this.currentIndex]?.classList.remove("active");
 
     // 인덱스 업데이트
     this.currentIndex = newIndex;
 
     // 새 슬라이드 활성화
-    slides[this.currentIndex]?.classList.add("active");
+    if (slides[this.currentIndex]) {
+      slides[this.currentIndex].classList.add("active");
+      // 강제로 opacity를 1로 설정하여 페이드인 효과
+      slides[this.currentIndex].style.opacity = "1";
+    }
     indicators[this.currentIndex]?.classList.add("active");
   }
 
