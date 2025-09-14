@@ -564,10 +564,12 @@ class CarouselSlider {
         if (index === 0) {
           slide.classList.add("active");
           slide.style.opacity = "1";
+          slide.style.zIndex = "2";
           // console.log(`✨ 첫 번째 슬라이드 활성화`);
         } else {
           slide.classList.remove("active");
           slide.style.opacity = "0";
+          slide.style.zIndex = "1";
         }
         // 페이드 모드에서는 기본 스타일로 복원
         slide.style.width = "";
@@ -660,19 +662,16 @@ class CarouselSlider {
       slide.style.display = "block"; // 페이드 모드에서는 모든 슬라이드가 보이도록
     });
 
-    // 이전 슬라이드 비활성화
-    if (slides[this.currentIndex]) {
-      slides[this.currentIndex].classList.remove("active");
-      // 명시적으로 opacity를 0으로 설정
-      setTimeout(() => {
-        if (
-          slides[this.currentIndex] &&
-          !slides[this.currentIndex].classList.contains("active")
-        ) {
-          slides[this.currentIndex].style.opacity = "0";
-        }
-      }, 10);
-    }
+    // 모든 슬라이드를 먼저 숨김 (새로운 슬라이드 제외)
+    slides.forEach((slide, index) => {
+      if (index !== newIndex) {
+        slide.classList.remove("active");
+        slide.style.zIndex = "1";
+        slide.style.opacity = "0";
+      }
+    });
+
+    // 이전 인디케이터 비활성화
     indicators[this.currentIndex]?.classList.remove("active");
 
     // 인덱스 업데이트
@@ -681,7 +680,7 @@ class CarouselSlider {
     // 새 슬라이드 활성화
     if (slides[this.currentIndex]) {
       slides[this.currentIndex].classList.add("active");
-      // 강제로 opacity를 1로 설정하여 페이드인 효과
+      slides[this.currentIndex].style.zIndex = "2";
       slides[this.currentIndex].style.opacity = "1";
     }
     indicators[this.currentIndex]?.classList.add("active");

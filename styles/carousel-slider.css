@@ -37,8 +37,9 @@
   transition: opacity 300ms ease-in-out, transform 300ms ease-in-out;
   transform: translateZ(0);
   will-change: opacity, transform;
-  display: none;
+  display: block; /* 페이드 모드에서는 기본적으로 모든 슬라이드가 존재 */
   overflow: hidden;
+  z-index: 1; /* 기본 z-index */
 }
 
 .carousel-slide.active {
