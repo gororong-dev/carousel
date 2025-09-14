@@ -1145,22 +1145,22 @@ class ConfigManager {
         }
       }
 
-      // 4. 적절한 폴더 구조인지 검증
-      if (!hasImages && !hasOtherFiles) {
-        return {
-          isValid: false,
-          message:
-            "빈 폴더입니다.\n이미지 파일이 있는 images 폴더를 선택해주세요.",
-        };
-      }
+      // // 4. 적절한 폴더 구조인지 검증
+      // if (!hasImages && !hasOtherFiles) {
+      //   return {
+      //     isValid: false,
+      //     message:
+      //       "빈 폴더입니다.\n이미지 파일이 있는 images 폴더를 선택해주세요.",
+      //   };
+      // }
 
-      if (!hasImages) {
-        return {
-          isValid: false,
-          message:
-            "이미지 파일이 없는 폴더입니다.\n슬라이드 이미지가 있는 images 폴더를 선택해주세요.",
-        };
-      }
+      // if (!hasImages) {
+      //   return {
+      //     isValid: false,
+      //     message:
+      //       "이미지 파일이 없는 폴더입니다.\n슬라이드 이미지가 있는 images 폴더를 선택해주세요.",
+      //   };
+      // }
 
       console.log("✅ 올바른 프로젝트 images 폴더 선택됨");
       return {
