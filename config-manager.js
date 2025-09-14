@@ -573,8 +573,8 @@ class ConfigManager {
 
     const removedImage = this.config.images.splice(index, 1)[0];
 
-    // 실제 파일 삭제 시도
-    await this.deleteImageFile(removedImage.path);
+    // 실제 파일을 deleted 폴더로 이동
+    await this.moveImageToDeleted(removedImage.path);
 
     // 순서 재정렬
     this.config.images.forEach((img, idx) => {
@@ -583,6 +583,49 @@ class ConfigManager {
 
     this.saveConfig();
     return removedImage;
+  }
+
+  async moveImageToDeleted(imagePath) {
+    console.log("=== 파일 이동 시작 ===");
+    console.log("이동할 이미지 경로:", imagePath);
+
+    if (!this.directoryHandle || !imagePath.startsWith("images/")) {
+      console.warn(
+        "디렉토리 핸들이 없거나 경로가 올바르지 않아 파일 이동을 건너뜁니다."
+      );
+      return;
+    }
+
+    const filename = imagePath.replace("images/", "");
+
+    try {
+      // 1. 원본 파일 핸들 가져오기
+      const sourceFileHandle = await this.directoryHandle.getFileHandle(
+        filename
+      );
+      const sourceFile = await sourceFileHandle.getFile();
+
+      // 2. 'deleted' 폴더 핸들 가져오기 (없으면 생성)
+      const deletedDirHandle = await this.directoryHandle.getDirectoryHandle(
+        "deleted",
+        { create: true }
+      );
+
+      // 3. 대상 파일 핸들 생성 및 파일 쓰기
+      const destFileHandle = await deletedDirHandle.getFileHandle(filename, {
+        create: true,
+      });
+      const writable = await destFileHandle.createWritable();
+      await writable.write(sourceFile);
+      await writable.close();
+
+      // 4. 원본 파일 삭제
+      await this.directoryHandle.removeEntry(filename);
+
+      console.log(`✅ 파일이 'images/deleted' 폴더로 이동됨: ${filename}`);
+    } catch (error) {
+      console.error("🚨 파일 이동 중 오류:", error);
+    }
   }
 
   async deleteImageFile(imagePath) {
