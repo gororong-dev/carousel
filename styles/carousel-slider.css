@@ -1,0 +1,341 @@
+/* carousel-slider.css: 캐러셀 슬라이더 전용 스타일 */
+.carousel-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+}
+
+.carousel-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.carousel-slides {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  overflow: hidden;
+  transform: translateZ(0);
+  will-change: transform;
+  backface-visibility: hidden;
+  touch-action: pan-y;
+}
+
+.carousel-slide {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  /* transition은 JavaScript에서 동적으로 설정됩니다 */
+  transform: translateZ(0);
+  will-change: opacity, transform;
+  display: none;
+  overflow: hidden;
+}
+
+.carousel-slide.active {
+  opacity: 1;
+  z-index: 2;
+  display: block;
+}
+
+.carousel-slide.prev {
+  transform: translateX(-100%);
+}
+
+.carousel-slide.next {
+  transform: translateX(100%);
+}
+
+/* 무한 스크롤 애니메이션 모드 */
+.carousel-container.scroll-mode .carousel-slides {
+  display: flex !important;
+  flex-direction: row;
+  width: 100%;
+  height: 100%;
+  transform: translateX(0) translateZ(0);
+  /* transition은 JavaScript에서 동적으로 설정됩니다 */
+  position: relative;
+  left: 0;
+  top: 0;
+  will-change: transform;
+  backface-visibility: hidden;
+  overflow: visible;
+}
+
+/* 무한 스크롤 모드에서 컨테이너 자체가 고정 크기 유지 */
+.carousel-container.scroll-mode {
+  overflow: hidden !important;
+  position: relative;
+  width: inherit !important;
+  height: inherit !important;
+  min-width: inherit !important;
+  max-width: inherit !important;
+}
+
+/* 무한 루프를 위한 특별 상태는 JavaScript에서 동적으로 관리됩니다 */
+
+.carousel-container.scroll-mode .carousel-slides.infinite-reset {
+  transition: none !important;
+}
+
+.carousel-container.scroll-mode .carousel-slide {
+  position: relative !important;
+  flex-shrink: 0 !important;
+  opacity: 1 !important;
+  transform: none !important;
+  transition: none !important;
+  display: block !important;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.carousel-container.scroll-mode .carousel-slide.active {
+  opacity: 1 !important;
+  z-index: auto;
+  display: block !important;
+}
+
+.carousel-slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  image-rendering: high-quality;
+  image-rendering: -webkit-optimize-contrast;
+}
+
+.carousel-controls {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 15px;
+  z-index: 10;
+  padding: 10px 20px;
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 25px;
+  backdrop-filter: blur(10px);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.app-container:hover .carousel-controls {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.carousel-controls.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* 키보드 도움말 모달 */
+.keyboard-help-modal {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 15px;
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 15px 20px;
+  border-radius: 10px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  pointer-events: none;
+  min-width: 200px;
+  text-align: center;
+}
+
+.keyboard-help-modal.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(-5px);
+}
+
+.keyboard-help-modal .help-title {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: #ffffff;
+}
+
+.keyboard-help-modal .help-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 12px;
+  color: #e0e0e0;
+}
+
+.keyboard-help-modal .help-item:last-child {
+  margin-bottom: 0;
+}
+
+.keyboard-help-modal .help-key {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-family: monospace;
+  font-size: 11px;
+  font-weight: bold;
+  color: #ffffff;
+  min-width: 50px;
+  text-align: center;
+  margin-right: 8px;
+}
+
+.carousel-btn {
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+  transition: all 0.3s ease;
+  user-select: none;
+}
+
+.carousel-btn:hover {
+  background: white;
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.carousel-btn:active {
+  transform: scale(0.95);
+}
+
+.carousel-btn:disabled,
+.carousel-btn.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.carousel-indicators {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 10;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.app-container:hover .carousel-indicators {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.carousel-indicators.hidden {
+  display: none;
+}
+
+.carousel-indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.carousel-indicator.active {
+  background: white;
+  transform: scale(1.2);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.carousel-indicator:hover {
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.carousel-status {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  color: white;
+  z-index: 5;
+  background: rgba(0, 0, 0, 0.8);
+  padding: 20px 30px;
+  border-radius: 10px;
+  backdrop-filter: blur(10px);
+}
+
+.carousel-status.hidden {
+  display: none;
+}
+
+.status-text {
+  display: block;
+  margin-bottom: 15px;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.status-progress {
+  width: 200px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #4caf50, #45a049);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+  width: 0%;
+}
+
+@media (max-width: 768px) {
+  .carousel-controls {
+    bottom: 10px;
+    padding: 8px 15px;
+  }
+  .carousel-btn {
+    width: 40px;
+    height: 40px;
+    font-size: 16px;
+  }
+  .carousel-indicators {
+    top: 10px;
+    right: 10px;
+    gap: 6px;
+  }
+  .carousel-indicator {
+    width: 10px;
+    height: 10px;
+  }
+}

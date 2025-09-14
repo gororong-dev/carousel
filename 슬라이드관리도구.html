@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="ko">
+<meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>슬라이드 관리 도구</title>
+    <link rel="stylesheet" href="styles/admin.css">
+
+</head>
+<body>
+    <div class="container">
+        <!-- 헤더 -->
+        <div class="header">
+            <h1>슬라이드 관리 도구</h1>
+        </div>
+        
+        <div class="main-content">
+            <!-- 왼쪽 컬럼: 이미지 목록 -->
+            <div class="left-column">
+                <!-- 이미지 목록 -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2 class="panel-title">
+                            이미지 목록
+                        </h2>
+                        <div class="header-buttons">
+                            <button class="action-btn info" id="helpBtn" onclick="toggleHelp()" title="사용법 및 키보드 컨트롤 보기">
+                                <span style="font-size: 16px;">ℹ️</span> 정보
+                            </button>
+                            <button class="action-btn secondary" id="selectDirectoryBtn">권한 승인</button>
+                            <button class="action-btn primary" id="refreshImagesBtn" onclick="refreshImages()" style="display: none;">새로고침</button>
+                            <button class="action-btn warning" onclick="resetConfig()">초기화</button>
+                        </div>
+                    </div>
+                    
+                    <!-- 도움말 메시지 -->
+                    <div class="help-message" id="helpMessage" style="display: none;">
+                        <div style="padding: 16px; background: #f8f9fa; border-left: 4px solid #007bff; border-radius: 8px; margin: 10px 0; font-size: 14px; color: #495057; line-height: 1.6;">
+                            <div style="margin-bottom: 16px;">
+                                <strong style="color: #007bff; font-size: 16px;">관리 도구 사용법</strong>
+                                <br><br>
+                                <strong>기본 설정:</strong>
+                                <br>1. '권한 승인' 버튼 클릭하여 프로젝트 루트폴더의 <strong>images</strong> 폴더 선택
+                                <br>2. '새로고침' 버튼으로 images 폴더의 최신 상태 반영
+                                <br>3. 이미지 추가는 직접 images 폴더에 파일을 복사한 후 새로고침
+                            </div>
+                            
+                            <div style="border-top: 1px solid #dee2e6; padding-top: 16px;">
+                                <strong style="color: #007bff; font-size: 16px;">슬라이드 키보드 컨트롤</strong>
+                                <br><br>
+                                <div style="display: grid; grid-template-columns: auto 1fr; gap: 8px; margin-left: 16px;">
+                                    <span style="background: #6c757d; color: white; padding: 2px 8px; border-radius: 4px; font-family: monospace; font-size: 12px; text-align: center; min-width: 60px;">←</span>
+                                    <span>이전 이미지로 이동</span>
+                                    
+                                    <span style="background: #6c757d; color: white; padding: 2px 8px; border-radius: 4px; font-family: monospace; font-size: 12px; text-align: center; min-width: 60px;">→</span>
+                                    <span>다음 이미지로 이동</span>
+                                    
+                                    <span style="background: #6c757d; color: white; padding: 2px 8px; border-radius: 4px; font-family: monospace; font-size: 12px; text-align: center; min-width: 60px;">Space</span>
+                                    <span>슬라이드 재생/일시정지</span>
+                                    
+                                    <span style="background: #6c757d; color: white; padding: 2px 8px; border-radius: 4px; font-family: monospace; font-size: 12px; text-align: center; min-width: 60px;">?</span>
+                                    <span>슬라이드에서 도움말 표시/숨김</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 통계 정보 -->
+                    <div class="stats-summary">
+                        <div class="stat-content">
+                            <span class="stat-label">총 이미지:</span>
+                            <span class="stat-value" id="totalImages">0</span>
+                        </div>
+                        <div class="stat-content">
+                            <span class="stat-label">활성 이미지:</span>
+                            <span class="stat-value" id="activeImages">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <button class="action-btn primary" id="openSlideBtn" onclick="openFullSlide()">슬라이드 열기</button>
+                        </div>
+                    </div>
+                    
+                    <div class="image-list" id="imageList">
+                        <!-- 동적으로 생성됨 -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 오른쪽 컬럼: 슬라이드 설정 -->
+            <div class="right-column">
+                <!-- 설정 -->
+                <div class="panel">
+                    <h2 class="panel-title">
+                        슬라이드 설정
+                    </h2>
+                    
+                    <div class="setting-group checkbox-group">
+                        <label class="setting-label">
+                            <input type="checkbox" id="autoPlay" checked> 자동 재생
+                        </label>
+                        <label class="setting-label">
+                            <input type="checkbox" id="showControls" checked> 컨트롤 버튼
+                        </label>
+                        <label class="setting-label">
+                            <input type="checkbox" id="showIndicators" checked> 인디케이터
+                        </label>
+                    </div>
+                    
+                    <div class="setting-group dual-range-group">
+                        <div class="range-item">
+                            <label class="setting-label">자동 전환 간격 (초)</label>
+                            <input type="range" class="setting-range" id="slideInterval" 
+                                   min="1" max="10" step="0.5" value="3">
+                            <div class="range-display" id="slideIntervalDisplay">3초</div>
+                        </div>
+                        <div class="range-item">
+                            <label class="setting-label">전환 효과 시간 (초)</label>
+                            <input type="range" class="setting-range" id="transitionDuration" 
+                                   min="0.3" max="2" step="0.1" value="0.8">
+                            <div class="range-display" id="transitionDurationDisplay">0.8초</div>
+                        </div>
+                    </div>
+                    
+                    <div class="setting-group">
+                        <label class="setting-label">애니메이션 타입</label>
+                        <select class="setting-input" id="animationType">
+                            <option value="scroll" selected>무한 스크롤</option>
+                            <option value="fade">페이드 인/아웃</option>
+                        </select>
+                    </div>
+                    
+                    
+                    <div class="setting-group">
+                        <label class="setting-label">이미지 표시 방식</label>
+                        <select class="setting-input" id="imageResize">
+                            <option value="contain">전체 이미지 보기</option>
+                            <option value="cover">화면 채우기</option>
+                            <option value="fill">화면 맞춤</option>
+                            <option value="scale-down">축소만 허용</option>
+                            <option value="none">원본 크기</option>
+                        </select>
+                    </div>
+                    
+                    <div class="setting-group">
+                        <label class="setting-label">이미지 위치</label>
+                        <select class="setting-input" id="objectPosition">
+                            <option value="center">중앙</option>
+                            <option value="top">상단</option>
+                            <option value="bottom">하단</option>
+                            <option value="left">왼쪽</option>
+                            <option value="right">오른쪽</option>
+                            <option value="top left">왼쪽 상단</option>
+                            <option value="top right">오른쪽 상단</option>
+                            <option value="bottom left">왼쪽 하단</option>
+                            <option value="bottom right">오른쪽 하단</option>
+                        </select>
+                    </div>
+                    
+                    <div class="setting-group">
+                        <label class="setting-label">배경색</label>
+                        <div class="color-input-group">
+                            <input type="color" class="setting-input" id="backgroundColor" value="#000000">
+                            <span class="color-value" id="backgroundColorValue">#000000</span>
+                        </div>
+                    </div>
+                    
+                    <div class="setting-group">
+                        <label class="setting-label">슬라이드 크기</label>
+                        <div class="size-inputs">
+                            <div class="size-input-group">
+                                <label class="size-label">너비</label>
+                                <input type="number" class="setting-input size-input" id="containerWidth" 
+                                       min="200" max="3840" step="1" value="600">
+                            </div>
+                            <div class="size-input-group">
+                                <label class="size-label">높이</label>
+                                <input type="number" class="setting-input size-input" id="containerHeight" 
+                                       min="150" max="2160" step="1" value="800">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="setting-group">
+                        <label class="setting-label">브라우저 창 여백</label>
+                        <div class="size-inputs">
+                            <div class="size-input-group">
+                                <label class="size-label">좌우</label>
+                                <input type="number" class="setting-input size-input" id="extraWidth" 
+                                       min="0" max="200" step="1" value="0">
+                            </div>
+                            <div class="size-input-group">
+                                <label class="size-label">상하</label>
+                                <input type="number" class="setting-input size-input" id="extraHeight" 
+                                       min="0" max="200" step="1" value="40">
+                            </div>
+                        </div>
+                        <div class="setting-description">
+                            브라우저 창을 열 때 추가할 여백 (px)
+                        </div>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+    </div>    <!-- 로딩 오버레이 -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <div>처리 중입니다...</div>
+        </div>
+    </div>
+    
+    <!-- 브라우저 비지원 오버레이 -->
+    <div class="browser-unsupported-overlay hidden" id="browserUnsupportedOverlay">
+        <div class="unsupported-content">
+            <div class="unsupported-icon">🌐</div>
+            <div class="unsupported-title">브라우저가 지원되지 않습니다</div>
+            <div class="unsupported-message">
+                이 애플리케이션은 <strong>File System Access API</strong>를 사용하여 파일을 관리합니다.<br>
+                현재 브라우저에서는 이 기능이 지원되지 않습니다.
+            </div>
+            <div class="recommended-browsers">
+                <div class="browsers-title">권장 브라우저:</div>
+                <div class="browser-list">
+                    <div class="browser-item">
+                        <span class="browser-icon">🟢</span>
+                        <span class="browser-name">Google Chrome</span>
+                    </div>
+                </div>
+            </div>
+            <div class="unsupported-note">
+                <strong>참고:</strong> 권장 브라우저를 사용하여 다시 시도해주세요.
+            </div>
+            <div class="unsupported-actions">
+                <button class="error-btn" onclick="window.location.reload()">새로고침</button>
+                <button class="error-btn secondary" onclick="window.close()">닫기</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 알림 -->
+    <div class="notification" id="notification">
+        <span id="notificationText"></span>
+    </div>
+    
+    <!-- 숨겨진 파일 입력 -->
+    <input type="file" id="importInput" accept=".json" style="display: none;">
+
+    <script src="config-manager.js"></script>
+    <script>
+        class AdminApp {
+            constructor() {
+                this.configManager = null;
+                this.init();
+            }
+
+            async init() {
+                // 브라우저 지원 여부 먼저 체크
+                if (!this.checkBrowserSupport()) {
+                    return; // 지원되지 않으면 초기화 중단
+                }
+                
+                try {
+                    this.showLoading();
+                    
+                    // ConfigManager 초기화
+                    this.configManager = new ConfigManager();
+                    await this.waitForConfig();
+                    
+                    // 폴더 권한 검증 (권한 상실 시 자동 정리)
+                    if (this.configManager.hasDirectoryAccess()) {
+                        const isValid = await this.configManager.validateDirectoryAccess();
+                        if (!isValid) {
+                            console.log("🔄 폴더 권한이 상실되어 초기화되었습니다");
+                            this.showNotification('폴더 접근 권한이 만료되었습니다. 폴더를 다시 선택해주세요.', 'warning');
+                        }
+                    }
+                    
+                    // UI 초기화
+                    this.setupEventListeners();
+                    this.loadSettings();
+                    await this.loadImageList();
+                    this.updateStats();
+                    this.updateDirectoryStatus(); // 권한 검증 후 디렉토리 상태 업데이트
+                    
+                    this.hideLoading();
+                    
+                    // 폴더가 선택되어 있으면 성공 메시지, 아니면 안내 메시지
+                    if (this.configManager.hasDirectoryAccess()) {
+                        const folderName = this.configManager.getDirectoryName();
+                        const images = this.configManager.getImages();
+                        this.showNotification(`images 폴더 권한이 복원되었습니다! (${folderName})\n📷 ${images.length}개 이미지가 로드되었습니다.`, 'success');
+                    } else {
+                        this.showNotification('먼저 프로젝트 루트폴더의 images 폴더를 선택해주세요.', 'info');
+                    }
+                    
+                } catch (error) {
+                    console.error('앱 초기화 실패:', error);
+                    this.hideLoading();
+                    this.showNotification('초기화 중 오류가 발생했습니다.', 'error');
+                }
+            }
+
+            checkBrowserSupport() {
+                const isSupported = 'showOpenFilePicker' in window && 'showDirectoryPicker' in window;
+                
+                if (!isSupported) {
+                    console.warn('❌ File System Access API가 지원되지 않는 브라우저입니다');
+                    this.showBrowserUnsupportedOverlay();
+                    this.disableInterface();
+                    return false;
+                }
+                
+                console.log('✅ File System Access API 지원 브라우저입니다');
+                return true;
+            }
+
+            showBrowserUnsupportedOverlay() {
+                const overlay = document.getElementById('browserUnsupportedOverlay');
+                overlay.classList.remove('hidden');
+            }
+
+            hideBrowserUnsupportedOverlay() {
+                const overlay = document.getElementById('browserUnsupportedOverlay');
+                overlay.classList.add('hidden');
+            }
+
+            disableInterface() {
+                // 모든 상호작용 요소 비활성화
+                const interactiveElements = document.querySelectorAll('button, input, select, textarea');
+                interactiveElements.forEach(element => {
+                    element.disabled = true;
+                    element.classList.add('disabled');
+                });
+
+                // 메인 컨테이너 투명도 조절
+                const container = document.querySelector('.container');
+                if (container) {
+                    container.style.opacity = '0.5';
+                    container.style.pointerEvents = 'none';
+                }
+            }
+
+            async waitForConfig() {
+                return new Promise((resolve) => {
+                    const checkConfig = () => {
+                        if (this.configManager.getConfig()) {
+                            resolve();
+                        } else {
+                            setTimeout(checkConfig, 100);
+                        }
+                    };
+                    checkConfig();
+                });
+            }
+
+            setupEventListeners() {
+                // 설정 변경 이벤트들
+                document.getElementById('slideInterval').addEventListener('input', (e) => {
+                    const value = parseFloat(e.target.value);
+                    document.getElementById('slideIntervalDisplay').textContent = `${value}초`;
+                    this.configManager.updateSetting('slideInterval', value * 1000);
+                });
+
+                document.getElementById('transitionDuration').addEventListener('input', (e) => {
+                    const value = parseFloat(e.target.value);
+                    document.getElementById('transitionDurationDisplay').textContent = `${value}초`;
+                    this.configManager.updateSetting('transitionDuration', value * 1000);
+                });
+
+                document.getElementById('animationType').addEventListener('change', (e) => {
+                    this.configManager.updateSetting('animationType', e.target.value);
+                });
+
+                document.getElementById('autoPlay').addEventListener('change', (e) => {
+                    this.configManager.updateSetting('autoPlay', e.target.checked);
+                });
+
+                document.getElementById('showControls').addEventListener('change', (e) => {
+                    this.configManager.updateSetting('showControls', e.target.checked);
+                });
+
+                document.getElementById('showIndicators').addEventListener('change', (e) => {
+                    this.configManager.updateSetting('showIndicators', e.target.checked);
+                });
+
+                document.getElementById('imageResize').addEventListener('change', (e) => {
+                    this.configManager.updateSetting('imageResize', e.target.value);
+                });
+
+                document.getElementById('objectPosition').addEventListener('change', (e) => {
+                    this.configManager.updateSetting('objectPosition', e.target.value);
+                });
+
+                document.getElementById('backgroundColor').addEventListener('change', (e) => {
+                    this.configManager.updateSetting('backgroundColor', e.target.value);
+                    document.getElementById('backgroundColorValue').textContent = e.target.value.toUpperCase();
+                });
+
+                document.getElementById('containerWidth').addEventListener('input', (e) => {
+                    const value = parseInt(e.target.value);
+                    if (value >= 200 && value <= 3840) {
+                        this.configManager.updateSetting('containerWidth', `${value}px`);
+                    }
+                });
+
+                document.getElementById('containerHeight').addEventListener('input', (e) => {
+                    const value = parseInt(e.target.value);
+                    if (value >= 150 && value <= 2160) {
+                        this.configManager.updateSetting('containerHeight', `${value}px`);
+                    }
+                });
+
+                document.getElementById('extraWidth').addEventListener('input', (e) => {
+                    const value = parseInt(e.target.value);
+                    if (value >= 0 && value <= 200) {
+                        this.configManager.updateSetting('extraWidth', value);
+                    }
+                });
+
+                document.getElementById('extraHeight').addEventListener('input', (e) => {
+                    const value = parseInt(e.target.value);
+                    if (value >= 0 && value <= 200) {
+                        this.configManager.updateSetting('extraHeight', value);
+                    }
+                });
+
+                // 설정 변경 감지 (throttled)
+                let updateStatsTimeout = null;
+                this.configManager.addEventListener('configChanged', () => {
+                    if (updateStatsTimeout) {
+                        clearTimeout(updateStatsTimeout);
+                    }
+                    updateStatsTimeout = setTimeout(() => {
+                        this.updateStats();
+                    }, 100);
+                });
+
+                // config.json 파일 자동 리로드 감지
+                this.configManager.addEventListener('configReloaded', () => {
+                    console.log('🔄 config.json 자동 리로드 감지 - UI 업데이트 중...');
+                    this.handleConfigReload();
+                });
+
+                // 가져오기 파일 입력
+                document.getElementById('importInput').addEventListener('change', (e) => {
+                    if (e.target.files.length > 0) {
+                        this.handleImport(e.target.files[0]);
+                    }
+                });
+
+                // 디렉토리 선택 버튼들
+                document.getElementById('selectDirectoryBtn').addEventListener('click', () => {
+                    this.selectDirectory();
+                });
+            }
+
+            updateLoadingMessage(message) {
+                const loadingContent = document.querySelector('.loading-content div:last-child');
+                if (loadingContent) {
+                    loadingContent.style.whiteSpace = 'pre-line';
+                    loadingContent.textContent = message;
+                }
+            }
+
+            loadSettings() {
+                const settings = this.configManager.getSettings();
+                
+                document.getElementById('slideInterval').value = settings.slideInterval / 1000;
+                document.getElementById('slideIntervalDisplay').textContent = `${settings.slideInterval / 1000}초`;
+                
+                document.getElementById('transitionDuration').value = settings.transitionDuration / 1000;
+                document.getElementById('transitionDurationDisplay').textContent = `${settings.transitionDuration / 1000}초`;
+                
+                document.getElementById('autoPlay').checked = settings.autoPlay;
+                document.getElementById('animationType').value = settings.animationType || 'scroll';
+                document.getElementById('showControls').checked = settings.showControls;
+                document.getElementById('showIndicators').checked = settings.showIndicators;
+                document.getElementById('imageResize').value = settings.imageResize;
+                document.getElementById('objectPosition').value = settings.objectPosition || 'center';
+                document.getElementById('backgroundColor').value = settings.backgroundColor;
+                document.getElementById('backgroundColorValue').textContent = settings.backgroundColor.toUpperCase();
+                
+                // 크기 설정 로드 (px 값에서 숫자만 추출)
+                const widthValue = parseInt(settings.containerWidth.replace('px', '')) || 600;
+                const heightValue = parseInt(settings.containerHeight.replace('px', '')) || 800;
+                document.getElementById('containerWidth').value = widthValue;
+                document.getElementById('containerHeight').value = heightValue;
+                
+                // 브라우저 여백 설정 로드
+                document.getElementById('extraWidth').value = settings.extraWidth || 0;
+                document.getElementById('extraHeight').value = settings.extraHeight || 40;
+            }
+
+            async loadImageList() {
+                const images = this.configManager.getImages();
+                const container = document.getElementById('imageList');
+
+                // 각 이미지의 실제 데이터를 비동기로 로드
+                const imageElements = await Promise.all(images
+                    .sort((a, b) => a.order - b.order)
+                    .map(async (image) => {
+                        // ConfigManager의 getImageData를 사용하여 올바른 경로 또는 데이터 얻기
+                        const imageSrc = await this.configManager.getImageData(image.path);
+                        
+                        return `
+                            <div class="image-item ${!image.enabled ? 'disabled' : ''}" data-id="${image.id}">
+                                <img src="${imageSrc}" alt="${image.alt}" class="image-preview" loading="lazy">
+                                <div class="image-info">
+                                    <div class="image-name">${image.filename}</div>
+                                    <div class="image-meta">순서: ${image.order} • 추가일: ${new Date(image.addedDate).toLocaleDateString()}</div>
+                                </div>
+                                <div class="image-controls">
+                                    <input type="number" class="order-input" value="${image.order}" 
+                                           min="1" max="${images.length}" 
+                                           onchange="app.updateImageOrder(${image.id}, this.value)">
+                                    <div class="toggle-switch ${image.enabled ? 'active' : ''}" 
+                                         onclick="app.toggleImageEnabled(${image.id})"></div>
+                                    <button class="btn" onclick="app.moveImageUp(${image.id})" title="위로">↑</button>
+                                    <button class="btn" onclick="app.moveImageDown(${image.id})" title="아래로">↓</button>
+                                    <button class="btn danger" onclick="app.removeImage(${image.id})" title="삭제">🗑️</button>
+                                </div>
+                            </div>
+                        `;
+                    })
+                );
+
+                container.innerHTML = imageElements.join('');
+            }
+
+            // 부분 업데이트를 위한 최적화된 메서드
+            updateImageItem(imageId) {
+                const images = this.configManager.getImages();
+                const image = images.find(img => img.id === imageId);
+                if (!image) return;
+
+                const imageItem = document.querySelector(`[data-id="${imageId}"]`);
+                if (imageItem) {
+                    // 상태 업데이트
+                    imageItem.className = `image-item ${!image.enabled ? 'disabled' : ''}`;
+                    
+                    // 토글 스위치 업데이트
+                    const toggle = imageItem.querySelector('.toggle-switch');
+                    toggle.className = `toggle-switch ${image.enabled ? 'active' : ''}`;
+                    
+                    // 순서 입력 필드 업데이트
+                    const orderInput = imageItem.querySelector('.order-input');
+                    orderInput.value = image.order;
+                    orderInput.max = images.length;
+                    
+                    // 메타 정보 업데이트
+                    const metaDiv = imageItem.querySelector('.image-meta');
+                    metaDiv.textContent = `순서: ${image.order} • 추가일: ${new Date(image.addedDate).toLocaleDateString()}`;
+                }
+            }
+
+            async updateImageOrder(imageId, newOrder) {
+                const images = this.configManager.getImages();
+                const order = Math.max(1, Math.min(parseInt(newOrder), images.length));
+                
+                if (this.configManager.updateImageOrder(imageId, order)) {
+                    // 순서 변경은 전체 리로드가 필요 (DOM 순서가 바뀌어야 함)
+                    await this.loadImageList();
+                    this.showNotification('순서가 변경되었습니다.', 'success');
+                }
+            }
+
+            async toggleImageEnabled(imageId) {
+                const image = this.configManager.getImages().find(img => img.id === imageId);
+                if (image) {
+                    this.configManager.updateImageEnabled(imageId, !image.enabled);
+                    this.updateImageItem(imageId); // 부분 업데이트만 수행
+                    this.updateStats(); // 통계만 업데이트
+                    this.showNotification(
+                        !image.enabled ? '이미지가 비활성화되었습니다.' : '이미지가 활성화되었습니다.',
+                        'success'
+                    );
+                }
+            }
+
+            async moveImageUp(imageId) {
+                const image = this.configManager.getImages().find(img => img.id === imageId);
+                if (image && image.order > 1) {
+                    await this.updateImageOrder(imageId, image.order - 1);
+                }
+            }
+
+            async moveImageDown(imageId) {
+                const images = this.configManager.getImages();
+                const image = images.find(img => img.id === imageId);
+                if (image && image.order < images.length) {
+                    await this.updateImageOrder(imageId, image.order + 1);
+                }
+            }
+
+            async removeImage(imageId) {
+                if (confirm('이 이미지를 삭제하시겠습니까?')) {
+                    this.showLoading();
+                    try {
+                        const removed = await this.configManager.removeImage(imageId);
+                        if (removed) {
+                            await this.loadImageList();
+                            this.showNotification('이미지가 삭제되었습니다.\n💾 실제 파일도 함께 삭제되었습니다.', 'success');
+                        }
+                    } catch (error) {
+                        console.error('이미지 삭제 실패:', error);
+                        this.showNotification('이미지 삭제 중 오류가 발생했습니다.', 'error');
+                    }
+                    this.hideLoading();
+                }
+            }
+
+            updateStats() {
+                const images = this.configManager.getImages();
+                const activeImages = this.configManager.getActiveImages();
+                
+                document.getElementById('totalImages').textContent = images.length;
+                document.getElementById('activeImages').textContent = activeImages.length;
+            }
+
+            showLoading() {
+                document.getElementById('loadingOverlay').classList.add('show');
+            }
+
+            hideLoading() {
+                document.getElementById('loadingOverlay').classList.remove('show');
+            }
+
+            showNotification(message, type = 'success') {
+                const notification = document.getElementById('notification');
+                const text = document.getElementById('notificationText');
+                
+                text.textContent = message;
+                notification.className = `notification ${type}`;
+                notification.classList.add('show');
+                
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 3000);
+            }
+
+            // 전역 함수들
+            exportConfig() {
+                this.configManager.exportConfig();
+                this.showNotification('설정이 내보내기 되었습니다.', 'success');
+            }
+
+            async saveToFile() {
+                this.showLoading();
+                
+                try {
+                    const success = await this.configManager.saveToFileExplicit();
+                    if (success) {
+                        this.showNotification('파일로 저장되었습니다.', 'success');
+                    } else {
+                        this.showNotification('저장이 취소되었습니다.', 'warning');
+                    }
+                } catch (error) {
+                    this.showNotification('저장 중 오류가 발생했습니다.', 'error');
+                }
+                
+                this.hideLoading();
+            }
+
+            importConfig() {
+                document.getElementById('importInput').click();
+            }
+
+            async handleImport(file) {
+                this.showLoading();
+                
+                try {
+                    const success = await this.configManager.importConfig(file);
+                    if (success) {
+                        this.loadSettings();
+                        await this.loadImageList();
+                        this.showNotification('설정을 가져왔습니다.', 'success');
+                    } else {
+                        this.showNotification('설정 가져오기에 실패했습니다.', 'error');
+                    }
+                } catch (error) {
+                    this.showNotification('파일을 읽을 수 없습니다.', 'error');
+                }
+                
+                this.hideLoading();
+            }
+
+            async selectDirectory() {
+                try {
+                    if (!this.configManager.isFileSystemSupported()) {
+                        this.showNotification('이 브라우저는 파일 시스템 접근을 지원하지 않습니다.', 'warning');
+                        return;
+                    }
+
+                    // 폴더 변경 제한 확인
+                    if (!this.configManager.canChangeDirectory()) {
+                        this.showNotification(
+                            '🔒 폴더 변경이 제한됩니다!\n\n' +
+                            '보안상의 이유로 올바른 프로젝트 images 폴더가 이미 선택된 경우\n' +
+                            '다른 폴더로 변경할 수 없습니다.\n\n' +
+                            '💡 다른 프로젝트를 사용하려면 브라우저를 새로고침해주세요.',
+                            'warning'
+                        );
+                        return;
+                    }
+
+                    this.showLoading();
+                    this.updateLoadingMessage('프로젝트 루트폴더의 images 폴더를 선택해주세요...');
+
+                    const result = await this.configManager.requestImagesPermission();
+                    
+                    if (result.success) {
+                        this.updateDirectoryStatus();
+                        
+                        // 스캔 결과 처리
+                        const scanResult = result.scanResult;
+                        let message = '✅ 프로젝트 images 폴더가 선택되었습니다!';
+                        message += '\n🔒 보안을 위해 폴더 변경이 제한됩니다.';
+                        
+                        if (scanResult) {
+                            if (scanResult.added > 0) {
+                                message += `\n\n📷 ${scanResult.added}개의 기존 이미지를 발견했습니다!`;
+                                if (scanResult.skipped > 0) {
+                                    message += `\n⏭️ ${scanResult.skipped}개의 이미지는 이미 목록에 있어서 건너뛰었습니다.`;
+                                }
+                                
+                                // 이미지 목록 새로고침
+                                await this.loadImageList();
+                            } else if (scanResult.scanned > 0) {
+                                message += '\n\n💡 images 폴더가 비어있거나 모든 이미지가 이미 추가되어 있습니다.';
+                            } else {
+                                message += '\n\n💡 images 폴더에 파일이 없습니다.';
+                            }
+                            
+                            if (scanResult.error) {
+                                message += `\n⚠️ 스캔 중 일부 오류가 발생했습니다: ${scanResult.error}`;
+                            }
+                        }
+                        
+                        this.showNotification(message, 'success');
+                    } else {
+                        if (result.error && result.error.name !== "AbortError") {
+                            this.showNotification('images 폴더 선택에 실패했습니다.', 'error');
+                        }
+                    }
+                } catch (error) {
+                    console.error('images 폴더 선택 실패:', error);
+                    this.showNotification('images 폴더 선택에 실패했습니다.', 'error');
+                } finally {
+                    this.hideLoading();
+                }
+            }
+
+            updateDirectoryStatus() {
+                const selectBtn = document.getElementById('selectDirectoryBtn');
+                const refreshBtn = document.getElementById('refreshImagesBtn');
+                const openSlideBtn = document.getElementById('openSlideBtn');
+                const helpMessage = document.getElementById('helpMessage');
+
+                if (this.configManager.hasDirectoryAccess()) {
+                    // 권한 승인 버튼 숨김, 새로고침 버튼 표시
+                    selectBtn.style.display = 'none';
+                    refreshBtn.style.display = 'inline-block';
+                    
+                    // 도움말 숨김
+                    helpMessage.style.display = 'none';
+                    
+                    // 슬라이드 열기 버튼 활성화
+                    openSlideBtn.classList.remove('disabled');
+                    openSlideBtn.disabled = false;
+                    openSlideBtn.title = '슬라이드 화면을 새 창으로 엽니다';
+                } else {
+                    // 새로고침 버튼 숨김, 권한 승인 버튼 표시
+                    selectBtn.style.display = 'inline-block';
+                    refreshBtn.style.display = 'none';
+                    selectBtn.textContent = '권한 승인';
+                    selectBtn.className = 'action-btn secondary';
+                    selectBtn.disabled = false;
+                    selectBtn.title = '프로젝트 images 폴더를 선택해주세요';
+                    
+                    // 도움말 표시
+                    helpMessage.style.display = 'block';
+                    
+                    // 슬라이드 열기 버튼 비활성화
+                    openSlideBtn.classList.add('disabled');
+                    openSlideBtn.disabled = true;
+                    openSlideBtn.title = '먼저 프로젝트 루트폴더의 images 폴더를 선택해주세요';
+                }
+            }
+
+            checkDirectoryAccess() {
+                if (!this.configManager.hasDirectoryAccess()) {
+                    this.showNotification('먼저 프로젝트 루트폴더의 images 폴더를 선택해주세요!', 'warning');
+                    return false;
+                }
+                return true;
+            }
+
+            async refreshImages() {
+                if (!this.configManager.hasDirectoryAccess()) {
+                    this.showNotification('폴더 접근 권한이 없습니다.', 'warning');
+                    return;
+                }
+
+                this.showLoading();
+                this.updateLoadingMessage('폴더와 config를 동기화하고 있습니다...');
+
+                try {
+                    // 폴더와 config를 완전히 동기화 (추가 + 제거)
+                    const syncResult = await this.configManager.syncImagesWithFolder();
+                    
+                    // 이미지 목록 새로고침
+                    await this.loadImageList();
+                    this.updateStats();
+                    
+                    let message = '폴더 동기화 완료!';
+                    if (syncResult.added > 0 || syncResult.removed > 0) {
+                        if (syncResult.added > 0) {
+                            message += `\n➕ ${syncResult.added}개의 새로운 이미지가 추가되었습니다.`;
+                        }
+                        if (syncResult.removed > 0) {
+                            message += `\n🗑️ ${syncResult.removed}개의 삭제된 이미지가 목록에서 제거되었습니다.`;
+                        }
+                    } else {
+                        message += '\n✅ 폴더와 목록이 이미 동기화되어 있습니다.';
+                    }
+                    
+                    this.showNotification(message, 'success');
+                } catch (error) {
+                    console.error('폴더 새로고침 실패:', error);
+                    this.showNotification('폴더 새로고침 중 오류가 발생했습니다.', 'error');
+                } finally {
+                    this.hideLoading();
+                }
+            }
+
+            async resetConfig() {
+                if (confirm('모든 설정과 이미지 목록을 초기화하시겠습니까?\n\n⚠️ 설정만 초기화되며, 실제 이미지 파일은 삭제되지 않습니다.')) {
+                    this.showLoading();
+                    this.updateLoadingMessage('설정을 초기화하고 있습니다...');
+                    
+                    try {
+                        // 1단계: config 설정만 초기화 (실제 파일은 삭제하지 않음, 폴더 정보도 초기화)
+                        const resetResult = await this.configManager.resetConfigOnly();
+                        
+                        // 2단계: 폴더 정보가 초기화되었으므로 UI 업데이트
+                        this.updateDirectoryStatus();
+                        
+                        // 3단계: UI 업데이트
+                        this.loadSettings();
+                        await this.loadImageList();
+                        this.updateStats();
+                        
+                        // 결과 메시지 생성
+                        let message = resetResult.message;
+                        
+                        this.showNotification(message, 'success');
+                        
+                    } catch (error) {
+                        console.error('초기화 중 오류:', error);
+                        this.showNotification('초기화 중 일부 오류가 발생했습니다.', 'warning');
+                    } finally {
+                        this.hideLoading();
+                    }
+                }
+            }
+
+            // config.json 자동 리로드 처리
+            async handleConfigReload() {
+                try {
+                    // UI 전체 새로고침
+                    this.loadSettings();
+                    await this.loadImageList();
+                    this.updateStats();
+                    
+                    this.showNotification('config.json 파일이 변경되어 자동으로 반영되었습니다! 🔄', 'info');
+                } catch (error) {
+                    console.error('config 리로드 중 오류:', error);
+                    this.showNotification('config 자동 리로드 중 오류가 발생했습니다.', 'error');
+                }
+            }
+        }
+
+        // 전역 함수들
+        let app;
+
+        function openFullSlide() {
+            // 폴더 선택 여부 확인
+            if (!app.configManager.hasDirectoryAccess()) {
+                app.showNotification('먼저 프로젝트 루트폴더의 images 폴더를 선택해주세요!', 'warning');
+                return;
+            }
+
+            // 이미지 개수 확인
+            const activeImages = app.configManager.getActiveImages();
+            if (activeImages.length === 0) {
+                app.showNotification('표시할 이미지가 없습니다. 먼저 이미지를 추가해주세요!', 'warning');
+                return;
+            }
+
+            // 현재 설정된 슬라이드 크기 가져오기
+            const config = app.configManager.getConfig();
+            let width = 600;  // 기본값
+            let height = 800;  // 기본값
+            
+            if (config && config.settings) {
+                // containerWidth와 containerHeight에서 픽셀 값 추출
+                const containerWidth = config.settings.containerWidth;
+                const containerHeight = config.settings.containerHeight;
+                
+                if (containerWidth && typeof containerWidth === 'string' && containerWidth.endsWith('px')) {
+                    width = parseInt(containerWidth);
+                }
+                if (containerHeight && typeof containerHeight === 'string' && containerHeight.endsWith('px')) {
+                    height = parseInt(containerHeight);
+                }
+                
+                console.log('🖥️ 새 창 크기 설정:', { width, height, containerWidth, containerHeight });
+            }
+            
+            // 설정에서 브라우저 여백 값 가져오기
+            const settings = app.configManager.getSettings();
+            const extraWidth = settings.extraWidth || 0;
+            const extraHeight = settings.extraHeight || 40;
+            
+            const windowWidth = width + extraWidth;
+            const windowHeight = height + extraHeight;
+            
+            // 화면 크기를 넘지 않도록 제한
+            const maxWidth = Math.min(windowWidth, screen.availWidth - 100);
+            const maxHeight = Math.min(windowHeight, screen.availHeight - 100);
+            
+            console.log('📱 최종 창 크기:', { 
+                windowWidth: maxWidth, 
+                windowHeight: maxHeight,
+                containerSize: `${width}x${height}`
+            });
+            
+            window.open('슬라이드.html', '_blank', `width=${maxWidth},height=${maxHeight},left=100,top=100`);
+        }
+
+        function saveToFile() {
+            if (app) app.saveToFile();
+        }
+
+        function exportConfig() {
+            if (app) app.exportConfig();
+        }
+
+        function importConfig() {
+            if (app) app.importConfig();
+        }
+
+        function resetConfig() {
+            if (app) app.resetConfig();
+        }
+
+        function refreshImages() {
+            if (app) app.refreshImages();
+        }
+
+        function toggleHelp() {
+            const helpMessage = document.getElementById('helpMessage');
+            const helpBtn = document.getElementById('helpBtn');
+            
+            if (helpMessage.style.display === 'none') {
+                helpMessage.style.display = 'block';
+                helpBtn.innerHTML = '<span style="font-size: 16px;">ℹ️</span> 정보 (닫기)';
+                helpBtn.title = '사용법 및 키보드 컨트롤 숨기기';
+            } else {
+                helpMessage.style.display = 'none';
+                helpBtn.innerHTML = '<span style="font-size: 16px;">ℹ️</span> 정보';
+                helpBtn.title = '사용법 및 키보드 컨트롤 보기';
+            }
+        }
+
+        // 앱 시작
+        document.addEventListener('DOMContentLoaded', () => {
+            app = new AdminApp();
+        });
+
+        // 페이지 종료 시 메모리 정리
+        window.addEventListener('beforeunload', () => {
+            if (app && app.configManager) {
+                app.configManager.destroy();
+            }
+        });
+
+        // 에러 핸들링
+        window.addEventListener('error', (event) => {
+            console.error('전역 오류:', event.error);
+            if (app) {
+                app.showNotification('예상치 못한 오류가 발생했습니다.', 'error');
+            }
+        });
+
+        window.addEventListener('unhandledrejection', (event) => {
+            console.error('처리되지 않은 프라미스 거부:', event.reason);
+        });
+    </script>
+</body>
+</html>
